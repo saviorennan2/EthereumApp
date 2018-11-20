@@ -51,16 +51,13 @@ import static android.os.Environment.DIRECTORY_DOWNLOADS;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final Logger log = LoggerFactory.getLogger(MainActivity.class);
-    private File walletPathFile;
     private Web3j web3;
     private Admin web3j;
     private Credentials credentials;
     private BigInteger nonce;
-    private PersonalUnlockAccount personalUnlockAccount;
-    String walletPath;
-    String fileName;
-    File path;
+    private String fileName;
+    private File path;
+    private String hexValue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,23 +115,18 @@ public class MainActivity extends AppCompatActivity {
 
     public void loadCredentials(View view) throws IOException {
 
-        BigInteger nonce = BigInteger.valueOf(25);
-        BigInteger gasprice = BigInteger.valueOf(0);
-        BigInteger gaslimit = BigInteger.valueOf(1048575);
-        BigInteger value = BigInteger.valueOf(0);
-
-        RawTransaction rawTransaction = RawTransaction.createContractTransaction(
-                nonce,
-                gasprice, gaslimit
-                ,
-                value,
-                "0x1234");
-        Credentials credentials = null;
-
         try {
             credentials = WalletUtils.loadCredentials("senha", path.getPath() + "/" + fileName);
             Log.d("CREDENTIALS", credentials.getAddress());
+
+            //GET NONCE
+            getNonce();
+
         } catch (CipherException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
             e.printStackTrace();
         }
 
@@ -145,6 +137,59 @@ public class MainActivity extends AppCompatActivity {
         new WebClientTask().execute("");
 
     }
+
+    public void getNonce() throws ExecutionException, InterruptedException {
+        EthGetTransactionCount ethGetTransactionCount = web3.ethGetTransactionCount(
+                credentials.getAddress(), DefaultBlockParameterName.LATEST).sendAsync().get();
+
+        nonce = ethGetTransactionCount.getTransactionCount();
+
+    }
+
+    public void transationRawTest(View view) {
+
+        BigInteger gasprice = BigInteger.valueOf(0);
+        BigInteger gaslimit = BigInteger.valueOf(1048575);
+        BigInteger value = BigInteger.valueOf(0);
+
+        RawTransaction rawTransaction = RawTransaction.createEtherTransaction(nonce,gasprice, gaslimit,"0xee0250c19ad59305b2bdb61f34b45b72fe37154f",value);
+
+        Log.d("Raw", rawTransaction.getNonce().toString());
+        Log.d("Cred", credentials.getAddress());
+
+        byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction, credentials);
+        hexValue = Numeric.toHexString(signedMessage);
+
+        new RawTransationtask().execute();
+
+    }
+
+    class RawTransationtask extends AsyncTask<String, Void, String> {
+
+        EthSendTransaction ethSendTransaction;
+
+        protected String doInBackground(String... urls) {
+            try {
+                ethSendTransaction = web3j.ethSendRawTransaction(hexValue).sendAsync().get();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            return "";
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+
+            String transactionHash = ethSendTransaction.getTransactionHash();
+
+            Log.d("TRANSACTION", transactionHash);
+
+        }
+    }
+
 
     class WebClientTask extends AsyncTask<String, Void, String> {
 
@@ -158,10 +203,7 @@ public class MainActivity extends AppCompatActivity {
 
                 // TESTEEEE
 
-                EthGetTransactionCount ethGetTransactionCount = web3.ethGetTransactionCount(
-                        "0x5db10750e8caff27f906b41c71b3471057dd2004", DefaultBlockParameterName.LATEST).sendAsync().get();
 
-                nonce = ethGetTransactionCount.getTransactionCount();
 
             } catch (ExecutionException e) {
                 e.printStackTrace();
