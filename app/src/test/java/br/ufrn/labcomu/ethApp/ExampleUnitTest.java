@@ -1,4 +1,4 @@
-package br.ufrn.labcomu.ethsavio;
+package br.ufrn.labcomu.ethApp;
 
 import org.junit.Test;
 

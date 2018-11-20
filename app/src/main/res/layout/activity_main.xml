@@ -28,34 +28,15 @@
             android:text="Create Wallet" />
 
         <Button
-            android:id="@+id/connectEthereumClientBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="10dp"
-            android:layout_below="@id/createWalletBtn"
-            android:onClick="connectEth"
-            android:text="Connect Ethereum" />
-
-        <Button
             android:id="@+id/loadCredentialsBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="10dp"
-            android:layout_below="@id/connectEthereumClientBtn"
+            android:layout_below="@id/createWalletBtn"
             android:onClick="loadCredentials"
             android:text="Load Credentials" />
 
-        <Button
-            android:id="@+id/transferFundsBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="10dp"
-            android:layout_below="@id/loadCredentialsBtn"
-            android:onClick="transferFunds"
-            android:text="Transfer Funds" />
         <Button
             android:id="@+id/transationtest"
             android:layout_width="wrap_content"

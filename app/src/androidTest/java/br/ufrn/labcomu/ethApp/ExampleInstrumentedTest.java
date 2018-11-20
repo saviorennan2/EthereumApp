@@ -1,4 +1,4 @@
-package br.ufrn.labcomu.ethsavio;
+package br.ufrn.labcomu.ethApp;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
