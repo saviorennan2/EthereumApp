@@ -4,15 +4,16 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
 import com.google.gson.Gson;
 
+import org.spongycastle.util.encoders.Hex;
 import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.RawTransaction;
@@ -30,12 +31,12 @@ import org.web3j.utils.Numeric;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.concurrent.ExecutionException;
-
 
 import static android.os.Environment.DIRECTORY_DOWNLOADS;
 
@@ -130,36 +131,30 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void transationRawTest(View view) {
-
         BigInteger gasprice = BigInteger.valueOf(0);
         BigInteger gaslimit = BigInteger.valueOf(1048575);
         BigInteger value = BigInteger.valueOf(0);
-        PatientMedicalRecordTransaction pmrt= new PatientMedicalRecordTransaction("0", "1",
+        PatientMedicalRecordTransaction pmrt = new PatientMedicalRecordTransaction("0", "1",
                 "OP", "OP","T",1,"Outro");
 
         //STRING
-        Gson gson= new Gson();
-        String pmrtStr= gson.toJson(pmrt);
+        Gson gson = new Gson();
+        String pmrtStr = gson.toJson(pmrt);
 
-        //BYTES
-//        byte[] pmrtBytes= SerializationUtils.serialize(pmrt);
-//        String pmrtStr = null;
-//        try {
-//            pmrtStr = new String(pmrtBytes, "UTF-8");
-//        } catch (UnsupportedEncodingException e) {
-//            e.printStackTrace();
-//        }
+        //STRING TO HEX
+        String pmrtHex = "";
+        try {
+            pmrtHex = Hex.toHexString(pmrtStr.getBytes("UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
 
-        RawTransaction rawTransaction = RawTransaction.createTransaction(nonce,gasprice, gaslimit,"0xee0250c19ad59305b2bdb61f34b45b72fe37154f",value, pmrtStr);
-
-        Log.d("Raw", rawTransaction.getNonce().toString());
-        Log.d("Cred", credentials.getAddress());
+        RawTransaction rawTransaction = RawTransaction.createTransaction(nonce, gasprice, gaslimit,"0xee0250c19ad59305b2bdb61f34b45b72fe37154f", value, pmrtHex);
 
         byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction, credentials);
         hexValue = Numeric.toHexString(signedMessage);
 
         new RawTransationtask().execute();
-
     }
 
     class RawTransationtask extends AsyncTask<String, Void, String> {
